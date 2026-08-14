@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIS Audit Agent - Security Assessment</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Premium Dark Theme Tokens */
+            --bg-base: #09090b;
+            --bg-surface: #18181b;
+            --bg-surface-elevated: #27272a;
+            
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            
+            --severity-critical: #ef4444;
+            --severity-high: #f97316;
+            --severity-medium: #eab308;
+            --severity-low: #3b82f6;
+            --severity-passed: #10b981;
+            --severity-unknown: #71717a;
+            
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+        }
+
+        .layout-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* Header / Branding */
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 100px;
+            color: var(--primary-hover);
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cards & Panels */
+        .glass-panel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            transition: var(--transition-smooth);
+        }
+
+        .glass-panel:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--border-hover);
+        }
+
+        /* Forms */
+        .form-section {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: var(--transition-smooth);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition-smooth);
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        input:focus + label, select:focus + label {
+            color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+            background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary:disabled {
+            background: var(--bg-surface-elevated);
+            color: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Dynamic SSH Fields */
+        .ssh-fields {
+            display: none;
+            animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 1px dashed var(--border-subtle);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loader */
+        .loader-container {
+            display: none;
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-subtle);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .loader-text {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            font-weight: 500;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Results Dashboard */
+        #results {
+            display: none;
+            margin-top: 4rem;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .section-header::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--border-subtle), transparent);
+        }
+
+        /* Summary Grid */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--stat-color, var(--border-subtle));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: var(--bg-surface-elevated);
+        }
+
+        .stat-card.critical { --stat-color: var(--severity-critical); }
+        .stat-card.high { --stat-color: var(--severity-high); }
+        .stat-card.medium { --stat-color: var(--severity-medium); }
+        .stat-card.low { --stat-color: var(--severity-low); }
+        .stat-card.passed { --stat-color: var(--severity-passed); }
+        .stat-card.unknown { --stat-color: var(--severity-unknown); }
+
+        .stat-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+        }
+
+        /* Findings List */
+        .finding-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-left: 4px solid var(--severity-color, var(--border-subtle));
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition-smooth);
+        }
+
+        .finding-card:hover {
+            border-color: var(--border-hover);
+            border-left-color: var(--severity-color, var(--border-hover));
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+        }
+
+        .finding-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .finding-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .badge {
+            padding: 0.35rem 1rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .badge.critical { background: rgba(239, 68, 68, 0.1); color: var(--severity-critical); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge.high { background: rgba(249, 115, 22, 0.1); color: var(--severity-high); border: 1px solid rgba(249, 115, 22, 0.2); }
+        .badge.medium { background: rgba(234, 179, 8, 0.1); color: var(--severity-medium); border: 1px solid rgba(234, 179, 8, 0.2); }
+        .badge.low { background: rgba(59, 130, 246, 0.1); color: var(--severity-low); border: 1px solid rgba(59, 130, 246, 0.2); }
+
+        .finding-meta {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .meta-item strong {
+            color: var(--text-primary);
+            margin-right: 0.25rem;
+        }
+
+        .code-block, .evidence-block {
+            background: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin-top: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .code-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
+            display: block;
+        }
+
+        .evidence-block {
+            color: #d1d5db;
+        }
+
+        .code-block {
+            color: #a7f3d0;
+            position: relative;
+        }
+        
+        .code-block::before {
+            content: "$";
+            color: var(--text-muted);
+            margin-right: 0.75rem;
+            user-select: none;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .success-banner {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            font-size: 1.125rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="layout-wrapper">
+    <header>
+        <div class="brand-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Security Core
+        </div>
+        <h1>CIS Audit Agent</h1>
+        <p class="subtitle">Automated infrastructure hardening and compliance validation tool for modern systems.</p>
+    </header>
+
+    <div class="glass-panel form-section" id="formPanel">
+        <div id="error-box" class="error-message" style="display: none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span id="error-text"></span>
+        </div>
+        
+        <form id="auditForm">
+            <div class="form-group">
+                <label for="target_type">Target Environment</label>
+                <select id="target_type" onchange="toggleSSHFields()">
+                    <option value="local">Local System / Docker Container</option>
+                    <option value="ssh">Remote SSH Host</option>
+                </select>
+            </div>
+
+            <div class="ssh-fields" id="sshFields">
+                <div class="form-group">
+                    <label for="host">Hostname / IP Address</label>
+                    <input type="text" id="host" placeholder="e.g., localhost or 192.168.1.100">
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label for="port">SSH Port</label>
+                        <input type="number" id="port" value="2222" placeholder="22">
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="e.g., root">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password <span style="color:var(--text-muted); font-weight:400;">(Optional if using keys)</span></label>
+                    <input type="password" id="password" placeholder="••••••••">
+                </div>
+                
+                <div class="form-group">
+                    <label for="key_path">SSH Key Path <span style="color:var(--text-muted); font-weight:400;">(Optional)</span></label>
+                    <input type="text" id="key_path" placeholder="e.g., ~/.ssh/id_rsa">
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-primary">
+                Run Compliance Audit
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+        </form>
+    </div>
+
+    <div class="loader-container" id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">Analyzing system configurations against CIS Benchmarks...</div>
+    </div>
+
+    <div id="results">
+        <h2 class="section-header">Audit Overview</h2>
+        <div class="summary-grid" id="summaryGrid">
+            <!-- Populated by JS -->
+        </div>
+
+        <h2 class="section-header">Actionable Intelligence</h2>
+        <div id="findingsList">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize form state
+    toggleSSHFields();
+
+    function toggleSSHFields() {
+        const type = document.getElementById('target_type').value;
+        const sshFields = document.getElementById('sshFields');
+        if(type === 'ssh') {
+            sshFields.style.display = 'block';
+        } else {
+            sshFields.style.display = 'none';
+        }
+    }
+
+    document.getElementById('auditForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const loader = document.getElementById('loader');
+        const results = document.getElementById('results');
+        const formPanel = document.getElementById('formPanel');
+        const errorBox = document.getElementById('error-box');
+        const errorText = document.getElementById('error-text');
+        
+        // UI State: Loading
+        btn.disabled = true;
+        btn.innerHTML = 'Executing...';
+        loader.style.display = 'block';
+        results.style.display = 'none';
+        errorBox.style.display = 'none';
+        formPanel.style.opacity = '0.5';
+        formPanel.style.pointerEvents = 'none';
+
+        const payload = {
+            target_type: document.getElementById('target_type').value,
+            host: document.getElementById('host').value.trim(),
+            port: parseInt(document.getElementById('port').value) || 22,
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value,
+            key_path: document.getElementById('key_path').value.trim(),
+        };
+
+        try {
+            const res = await fetch('/api/audit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            
+            if (!res.ok) {
+                throw new Error(data.detail || 'Audit failed to execute. Check connection parameters.');
+            }
+
+            renderReport(data.report_data);
+            
+            // Auto scroll to results smoothly
+            setTimeout(() => {
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            
+        } catch (error) {
+            errorText.textContent = error.message;
+            errorBox.style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } finally {
+            // UI State: Reset
+            btn.disabled = false;
+            btn.innerHTML = 'Run Compliance Audit <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+            loader.style.display = 'none';
+            formPanel.style.opacity = '1';
+            formPanel.style.pointerEvents = 'auto';
+        }
+    });
+
+    function renderReport(data) {
+        document.getElementById('results').style.display = 'block';
+        
+        // Render Summary
+        const s = data.summary;
+        document.getElementById('summaryGrid').innerHTML = `
+            <div class="stat-card critical"><div class="stat-value">${s.critical}</div><div class="stat-label">Critical</div></div>
+            <div class="stat-card high"><div class="stat-value">${s.high}</div><div class="stat-label">High</div></div>
+            <div class="stat-card medium"><div class="stat-value">${s.medium}</div><div class="stat-label">Medium</div></div>
+            <div class="stat-card low"><div class="stat-value">${s.low}</div><div class="stat-label">Low</div></div>
+            <div class="stat-card passed"><div class="stat-value">${s.passed}</div><div class="stat-label">Passed</div></div>
+            <div class="stat-card unknown"><div class="stat-value">${s.unknown}</div><div class="stat-label">Unknown</div></div>
+        `;
+
+        // Render Findings
+        let html = '';
+        if (data.fix_list.length === 0) {
+            html = '<div class="success-banner"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block; margin: 0 auto 1rem;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>All automated checks passed successfully. System aligns with CIS baselines.</div>';
+        } else {
+            data.fix_list.forEach(fix => {
+                const badgeClass = fix.severity.toLowerCase();
+                const severityVar = `var(--severity-${badgeClass})`;
+                
+                html += `
+                <div class="finding-card" style="--severity-color: ${severityVar}">
+                    <div class="finding-header">
+                        <div class="finding-title">
+                            <span style="color:var(--text-muted); font-family:'JetBrains Mono'; margin-right:0.5rem; font-size: 0.9em;">${fix.rule_id}</span>
+                            ${fix.finding}
+                        </div>
+                        <span class="badge ${badgeClass}">${fix.severity}</span>
+                    </div>
+                    
+                    <div class="finding-meta">
+                        <div class="meta-item"><strong>Category:</strong> ${fix.category}</div>
+                    </div>
+                    
+                    <p style="color:var(--text-secondary); margin-bottom: 1.5rem;">${fix.why_it_matters}</p>
+                    
+                    <span class="code-label">System Evidence</span>
+                    <div class="evidence-block">${fix.evidence_ref || '<i>(No output captured)</i>'}</div>
+
+                    <span class="code-label">Remediation Command</span>
+                    <div class="code-block">${fix.fix_command}</div>
+                </div>
+                `;
+            });
+        }
+        document.getElementById('findingsList').innerHTML = html;
+    }
+</script>
+
+</body>
+</html>

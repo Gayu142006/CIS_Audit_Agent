@@ -1,0 +1,5 @@
+paramiko
+fastapi
+uvicorn
+pydantic
+jinja2
